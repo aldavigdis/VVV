@@ -33,6 +33,11 @@ module VVV
       nil
     end
 
+    def self.info_platform
+      puts "#{C_YELLOW}Platform: #{VVV::Info.platform}#{C_RESET}"
+      nil
+    end
+
     def self.warning_sudo_bear
       render_file('../assets/bear_warning_sudo.txt', C_RED)
       nil
@@ -80,7 +85,9 @@ module VVV
       [
         "#{C_RED}__ #{C_GREEN}__ #{C_BLUE}__ __#{C_RESET}",
         "#{C_RED }\\ V#{C_GREEN}\\ V#{C_BLUE}\\ V /#{C_RESET}",
-        "#{C_RED} \\_/#{C_GREEN}\\_/#{C_BLUE}\\_/ #{C_RESET}"]
+        "#{C_RED} \\_/#{C_GREEN}\\_/#{C_BLUE}\\_/ #{C_RESET}",
+        ''
+      ]
     end
   end
 end

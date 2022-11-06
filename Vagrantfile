@@ -15,7 +15,11 @@ require './.vvv/lib/splash_screens.rb'
 require './.vvv/lib/bootstrap.rb'
 require './.vvv/lib/migrate.rb'
 
-VVV::SplashScreens.v_logo_with_info if VVV::Bootstrap.show_logo?
+if VVV::Bootstrap.show_logo?
+  VVV::SplashScreens.v_logo_with_info
+  VVV::SplashScreens.info_platform
+end
+
 VVV.SplashScreens.warning_sudo_bear if VVV::Bootstrap.show_sudo_bear?
 
 VVV::Migrate.migrate_config
@@ -88,60 +92,6 @@ $vvv_config = vvv_config
 # Show the second splash screen section
 
 if show_logo
-  platform = [ Vagrant::Util::Platform.platform]
-  if Vagrant::Util::Platform.windows?
-    platform << 'windows '
-    platform << 'wsl ' if Vagrant::Util::Platform.wsl?
-    platform << 'msys ' if Vagrant::Util::Platform.msys?
-    platform << 'cygwin ' if Vagrant::Util::Platform.cygwin?
-    if Vagrant::Util::Platform.windows_hyperv_enabled?
-      platform << 'HyperV-Enabled '
-    end
-    platform << 'HyperV-Admin ' if Vagrant::Util::Platform.windows_hyperv_admin?
-    if Vagrant::Util::Platform.windows_admin?
-      platform << 'HasWinAdminPriv '
-    else
-      platform << 'missingWinAdminPriv ' unless Vagrant::Util::Platform.windows_admin?
-    end
-  else
-    platform << 'shell:' + ENV['SHELL'] if ENV['SHELL']
-    platform << 'systemd ' if Vagrant::Util::Platform.systemd?
-  end
-
-  platform << 'vagrant-hostmanager' if Vagrant.has_plugin?('vagrant-hostmanager')
-  platform << 'vagrant-hostsupdater' if Vagrant.has_plugin?('vagrant-hostsupdater')
-  platform << 'vagrant-goodhosts' if Vagrant.has_plugin?('vagrant-goodhosts')
-  platform << 'vagrant-vbguest' if Vagrant.has_plugin?('vagrant-vbguest')
-  platform << 'vagrant-disksize' if Vagrant.has_plugin?('vagrant-disksize')
-
-  platform << 'CaseSensitiveFS' if Vagrant::Util::Platform.fs_case_sensitive?
-  unless Vagrant::Util::Platform.terminal_supports_colors?
-    platform << 'monochrome-terminal'
-  end
-
-  if defined? vvv_config['vm_config']['wordcamp_contributor_day_box']
-    if vvv_config['vm_config']['wordcamp_contributor_day_box'] == true
-      platform << 'contributor_day_box'
-    end
-  end
-
-  if defined? vvv_config['vm_config']['box']
-    unless vvv_config['vm_config']['box'].nil?
-      puts "Custom Box: Box overridden via config/config.yml , this won't take effect until a destroy + reprovision happens"
-      platform << 'box_override:' + vvv_config['vm_config']['box']
-    end
-  end
-
-  if defined? vvv_config['general']['db_share_type']
-    if vvv_config['general']['db_share_type'] != true
-      platform << 'shared_db_folder_disabled'
-    else
-      platform << 'shared_db_folder_enabled'
-    end
-  else
-    platform << 'shared_db_folder_default'
-  end
-
   provider_version = '??'
 
   provider_meta = nil
