@@ -24,49 +24,9 @@ VVV::Migrate.migrate_sql_database_backups
 ###
 # Temporary tape and chewing gum to glue the new code to the old
 ###
-vvv_config  = VVV::Config.values
+vvv_config  = VVV::Config.new.values
 vagrant_dir = VVV::Info.vagrant_dir
 show_logo   = VVV::Bootstrap.show_logo?
-
-vvv_config['hosts'] = [] unless vvv_config['hosts'].is_a? Hash
-
-vvv_config['hosts'] += ['vvv.test']
-
-vvv_config['sites'].each do |site, args|
-  if args.is_a? String
-    repo = args
-    args = {}
-    args['repo'] = repo
-  end
-
-  args = {} unless args.is_a? Hash
-
-  defaults = {}
-  defaults['repo'] = false
-  defaults['vm_dir'] = "/srv/www/#{site}"
-  defaults['local_dir'] = File.join(vagrant_dir, 'www', site)
-  defaults['branch'] = 'master'
-  defaults['skip_provisioning'] = false
-  defaults['allow_customfile'] = false
-  defaults['nginx_upstream'] = 'php'
-  defaults['hosts'] = []
-
-  vvv_config['sites'][site] = defaults.merge(args)
-
-  unless vvv_config['sites'][site]['skip_provisioning']
-    site_host_paths = Dir.glob(Array.new(4) { |i| vvv_config['sites'][site]['local_dir'] + '/*' * (i + 1) + '/vvv-hosts' })
-    vvv_config['sites'][site]['hosts'] += site_host_paths.map do |path|
-      lines = File.readlines(path).map(&:chomp)
-      lines.grep(/\A[^#]/)
-    end.flatten
-    if vvv_config['sites'][site]['hosts'].is_a? Array
-      vvv_config['hosts'] += vvv_config['sites'][site]['hosts']
-    else
-      vvv_config['hosts'] += ["#{site}.test"]
-    end
-  end
-  vvv_config['sites'][site].delete('hosts')
-end
 
 if vvv_config['extension-sources'].is_a? Hash
   vvv_config['extension-sources'].each do |name, args|
