@@ -1,14 +1,14 @@
 module VVV
   class SplashScreens
-    C_RESET    = "\033[0m"
-    C_RED      = "\033[38;5;9m"
-    C_CYAN     = "\033[38;5;6m"
-    C_GREEN    = "\033[1;38;5;2m"
-    C_BLUE     = "\033[38;5;4m"
-    C_PURPLE   = "\033[38;5;5m"
-    C_DOCS     = "\033[0m"
-    C_YELLOW   = "\033[38;5;3m"
-    C_YELLOW_U = "\033[4;38;5;3m"
+    C_RESET    = "\033[0m".freeze
+    C_RED      = "\033[38;5;9m".freeze
+    C_CYAN     = "\033[38;5;6m".freeze
+    C_GREEN    = "\033[1;38;5;2m".freeze
+    C_BLUE     = "\033[38;5;4m".freeze
+    C_PURPLE   = "\033[38;5;5m".freeze
+    C_DOCS     = "\033[0m".freeze
+    C_YELLOW   = "\033[38;5;3m".freeze
+    C_YELLOW_U = "\033[4;38;5;3m".freeze
 
     require 'pathname'
 
@@ -41,7 +41,7 @@ module VVV
 
     def self.info_provider(provider, version)
       puts "#{C_GREEN}Vagrant: #{C_GREEN}v#{Vagrant::VERSION}, "\
-           "#{C_BLUE}#{provider}: #{C_BLUE}v#{version}"
+           "#{C_BLUE}#{provider}: #{C_BLUE}v#{version}#{C_RESET}"
       puts
     end
 

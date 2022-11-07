@@ -28,60 +28,6 @@ VVV::Migrate.migrate_sql_database_backups
 vvv_config  = VVV::Config.new.values
 vagrant_dir = VVV::Info.vagrant_dir
 
-if vvv_config['extension-sources'].is_a? Hash
-  vvv_config['extension-sources'].each do |name, args|
-    next unless args.is_a? String
-
-    repo = args
-    args = {}
-    args['repo'] = repo
-    args['branch'] = 'master'
-
-    vvv_config['extension-sources'][name] = args
-  end
-else
-  vvv_config['extension-sources'] = {}
-end
-
-vvv_config['dashboard'] = {} unless vvv_config['dashboard']
-dashboard_defaults = {}
-dashboard_defaults['repo'] = 'https://github.com/Varying-Vagrant-Vagrants/dashboard.git'
-dashboard_defaults['branch'] = 'master'
-vvv_config['dashboard'] = dashboard_defaults.merge(vvv_config['dashboard'])
-
-unless vvv_config['extension-sources'].key?('core')
-  vvv_config['extension-sources']['core'] = {}
-  vvv_config['extension-sources']['core']['repo'] = 'https://github.com/Varying-Vagrant-Vagrants/vvv-utilities.git'
-  vvv_config['extension-sources']['core']['branch'] = 'master'
-end
-
-vvv_config['utilities'] = {} unless vvv_config['utilities'].is_a? Hash
-vvv_config['utility-sources'] = {} unless vvv_config['utility-sources'].is_a? Hash
-vvv_config['extension-sources'] = {} unless vvv_config['extension-sources'].is_a? Hash
-vvv_config['extensions'] = {} unless vvv_config['extensions'].is_a? Hash
-
-vvv_config['vm_config'] = {} unless vvv_config['vm_config'].is_a? Hash
-
-vvv_config['general'] = {} unless vvv_config['general'].is_a? Hash
-
-defaults = {}
-defaults['memory'] = 2048
-defaults['cores'] = 1
-defaults['provider'] = 'virtualbox'
-
-# if Arm default to parallels
-if Etc.uname[:version].include? 'ARM64'
-  defaults['provider'] = 'parallels'
-end
-
-# This should rarely be overridden, so it's not included in the config/default-config.yml file.
-defaults['private_network_ip'] = '192.168.56.4'
-
-vvv_config['vm_config'] = defaults.merge(vvv_config['vm_config'])
-vvv_config['hosts'] = vvv_config['hosts'].uniq
-
-vvv_config['vagrant-plugins'] = {} unless vvv_config['vagrant-plugins']
-
 # Create a global variable to use in functions and classes
 $vvv_config = vvv_config
 
