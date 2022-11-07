@@ -15,10 +15,7 @@ require './.vvv/lib/splash_screens.rb'
 require './.vvv/lib/bootstrap.rb'
 require './.vvv/lib/migrate.rb'
 
-if VVV::Bootstrap.show_logo?
-  VVV::SplashScreens.v_logo_with_info
-  VVV::SplashScreens.info_platform
-end
+VVV::SplashScreens.v_logo_with_info if VVV::Bootstrap.show_logo?
 
 VVV.SplashScreens.warning_sudo_bear if VVV::Bootstrap.show_sudo_bear?
 
@@ -30,7 +27,6 @@ VVV::Migrate.migrate_sql_database_backups
 ###
 vvv_config  = VVV::Config.new.values
 vagrant_dir = VVV::Info.vagrant_dir
-show_logo   = VVV::Bootstrap.show_logo?
 
 if vvv_config['extension-sources'].is_a? Hash
   vvv_config['extension-sources'].each do |name, args|
@@ -91,36 +87,12 @@ $vvv_config = vvv_config
 
 # Show the second splash screen section
 
-if show_logo
-  provider_version = '??'
-
-  provider_meta = nil
-
-  case vvv_config['vm_config']['provider']
-  when 'virtualbox'
-    provider_meta = VagrantPlugins::ProviderVirtualBox::Driver::Meta.new()
-    provider_version = provider_meta.version
-  when 'parallels'
-    provider_meta = VagrantPlugins::Parallels::Driver::Meta.new()
-    provider_version = provider_meta.version
-  when 'vmware'
-    provider_version = '??'
-  when 'hyperv'
-    provider_version = 'n/a'
-  else
-    provider_version = '??'
-  end
-
-  splashsecond = <<~HEREDOC
-    #{VVV::SplashScreens::C_YELLOW}Platform: #{VVV::SplashScreens::C_YELLOW}#{platform.join(' ')}
-    #{VVV::SplashScreens::C_GREEN}Vagrant: #{VVV::SplashScreens::C_GREEN}v#{Vagrant::VERSION}, #{VVV::SplashScreens::C_BLUE}#{vvv_config['vm_config']['provider']}: #{VVV::SplashScreens::C_BLUE}v#{provider_version}
-
-    #{VVV::SplashScreens::C_DOCS}Docs:       #{VVV::SplashScreens::C_YELLOW_U}https://varyingvagrantvagrants.org/
-    #{VVV::SplashScreens::C_DOCS}Contribute: #{VVV::SplashScreens::C_YELLOW_U}https://github.com/varying-vagrant-vagrants/vvv
-    #{VVV::SplashScreens::C_DOCS}Dashboard:  #{VVV::SplashScreens::C_YELLOW_U}http://vvv.test#{VVV::SplashScreens::C_RESET}
-
-  HEREDOC
-  puts splashsecond
+if VVV::Bootstrap.show_logo?
+  VVV::SplashScreens.info_platform
+  VVV::SplashScreens.info_provider(
+    vvv_config['vm_config']['provider'],
+    VVV::Info.provider_version(vvv_config['vm_config']['provider'])
+  )
 end
 
 if defined? vvv_config['vm_config']['provider']

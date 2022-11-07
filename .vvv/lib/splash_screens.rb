@@ -35,6 +35,21 @@ module VVV
 
     def self.info_platform
       puts "#{C_YELLOW}Platform: #{VVV::Info.platform}#{C_RESET}"
+      puts
+      nil
+    end
+
+    def self.info_provider(provider, version)
+      puts "#{C_GREEN}Vagrant: #{C_GREEN}v#{Vagrant::VERSION}, "\
+           "#{C_BLUE}#{provider}: #{C_BLUE}v#{version}"
+      puts
+    end
+
+    def self.info_docs
+      puts "#{C_DOCS}Docs:       #{C_YELLOW_U}https://varyingvagrantvagrants.org/"
+      puts "#{C_DOCS}Contribute: #{C_YELLOW_U}https://github.com/varying-vagrant-vagrants/vvv"
+      puts "#{C_DOCS}Dashboard:  #{C_YELLOW_U}http://vvv.test#{C_RESET}"
+      puts
       nil
     end
 

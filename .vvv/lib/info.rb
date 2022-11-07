@@ -131,5 +131,19 @@ module VVV
 
       json_hash['installed'].keys
     end
+
+    def self.provider_version(provider)
+      case provider
+      when 'virtualbox', 'parallels'
+        provider_meta = VagrantPlugins::ProviderVirtualBox::Driver::Meta.new()
+        return provider_meta.version
+      when 'vmware'
+        return '??'
+      when 'hyperv'
+        return 'n/a'
+      else
+        return '??'
+      end
+    end
   end
 end
