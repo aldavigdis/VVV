@@ -28,11 +28,6 @@ VVV::Migrate.migrate_sql_database_backups
 vvv_config  = VVV::Config.new.values
 vagrant_dir = VVV::Info.vagrant_dir
 
-# Create a global variable to use in functions and classes
-$vvv_config = vvv_config
-
-# Show the second splash screen section
-
 if VVV::Bootstrap.show_logo?
   VVV::SplashScreens.info_platform
   VVV::SplashScreens.info_provider(
