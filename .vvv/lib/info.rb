@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module VVV
   class Info
     require 'vagrant/util/platform'
@@ -22,7 +24,7 @@ module VVV
       version_file_path = "#{vagrant_dir}/version"
       return '?' unless File.file? version_file_path
 
-      File.open(version_file_path, 'r').read.chomp
+      File.read(version_file_path).chomp
     end
 
     def self.zip_or_git
@@ -41,42 +43,18 @@ module VVV
       "v#{version} Ruby:#{RUBY_VERSION}, Path:\"#{vagrant_dir}\""
     end
 
-    def self.platform
-      self.platform_array.join(' ')
+    def self.platform(config)
+      platform_array(config).join(' ')
     end
 
-    def self.platform_array
-      config = VVV::Config.new.values
-
+    def self.platform_array(config)
       platform = [Vagrant::Util::Platform.platform]
 
-      if Vagrant::Util::Platform.windows?
-        # Windows specific checks
-        platform << 'Windows'
-        platform << 'wsl' if Vagrant::Util::Platform.wsl?
-        platform << 'msys' if Vagrant::Util::Platform.msys?
-        platform << 'cygwin' if Vagrant::Util::Platform.cygwin?
-        if Vagrant::Util::Platform.windows_hyperv_enabled?
-          platform << 'HyperV-Enabled'
-        end
-        if Vagrant::Util::Platform.windows_hyperv_admin?
-          platform << 'HyperV-Admin'
-        end
-        if Vagrant::Util::Platform.windows_admin?
-          platform << 'HasWinAdminPriv'
-        end
-        unless Vagrant::Util::Platform.windows_admin?
-          platform << 'missingWinAdminPriv'
-        end
-      else
-        # Non-Windows specific checks
-        platform << "shell: #{ENV['SHELL']}" if ENV['SHELL']
-        platform << 'systemd' if Vagrant::Util::Platform.systemd?
-      end
+      platform += platform_array_windows
+      platform += platform_array_non_windows
 
-      (vagrant_global_plugins + vagrant_local_plugins).each do |p|
-        platform << p
-      end
+      platform += vagrant_global_plugins
+      platform += vagrant_local_plugins
 
       if Vagrant::Util::Platform.fs_case_sensitive?
         platform << 'CaseSensitiveFS'
@@ -94,22 +72,26 @@ module VVV
 
       if config['vm_config'].key?('box')
         platform << "box_override:#{config['vm_config']['box']}"
-        # Todo: Add info box with the following text:
+        # TODO: Add info box with the following text:
         # Custom Box: Box overridden via config/config.yml,
         # this won't take effect until a destroy + reprovision happens
       end
 
-      if config['general'].key?('db_share_type')
-        if config['general']['db_share_type'] == true
-          platform << 'shared_db_folder_enabled'
-        else
-          platform << 'shared_db_folder_disabled'
-        end
-      else
-        platform << 'shared_db_folder_default'
-      end
+      platform << platform_db_share_type(config)
 
       platform
+    end
+
+    def self.platform_db_share_type(config)
+      if config['general'].key?('db_share_type')
+        if config['general']['db_share_type'] == true
+          'shared_db_folder_enabled'
+        else
+          'shared_db_folder_disabled'
+        end
+      else
+        'shared_db_folder_default'
+      end
     end
 
     def self.vagrant_local_plugins
@@ -135,15 +117,57 @@ module VVV
     def self.provider_version(provider)
       case provider
       when 'virtualbox', 'parallels'
-        provider_meta = VagrantPlugins::ProviderVirtualBox::Driver::Meta.new()
-        return provider_meta.version
-      when 'vmware'
-        return '??'
+        provider_meta = VagrantPlugins::ProviderVirtualBox::Driver::Meta.new
+        provider_meta.version
       when 'hyperv'
-        return 'n/a'
+        'n/a'
       else
-        return '??'
+        '??'
       end
+    end
+
+    def self.platform_array_non_windows
+      return [] if Vagrant::Util::Platform.windows?
+
+      platform = []
+
+      platform << "shell: #{ENV['SHELL']}" if ENV['SHELL']
+      platform << 'systemd' if Vagrant::Util::Platform.systemd?
+
+      platform
+    end
+
+    def self.platform_array_hyperv
+      return [] unless Vagrant::Util::Platform.windows?
+
+      platform = []
+
+      if Vagrant::Util::Platform.windows_hyperv_enabled?
+        platform << 'HyperV-Enabled'
+      end
+      if Vagrant::Util::Platform.windows_hyperv_admin?
+        platform << 'HyperV-Admin'
+      end
+
+      platform
+    end
+
+    def self.platform_windows_admin
+      return 'missingWinAdminPriv' unless Vagrant::Util::Platform.windows_admin?
+
+      HasWinAdminPriv
+    end
+
+    def self.platform_array_windows
+      return [] unless Vagrant::Util::Platform.windows?
+
+      platform = ['Windows']
+      platform << 'wsl' if Vagrant::Util::Platform.wsl?
+      platform << 'msys' if Vagrant::Util::Platform.msys?
+      platform << 'cygwin' if Vagrant::Util::Platform.cygwin?
+      platform += platform_array_hyperv
+      platform << platform_windows_admin
+      platform
     end
   end
 end

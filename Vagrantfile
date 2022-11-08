@@ -3,45 +3,38 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby ts=2 sw=2 et:
 
-VAGRANTFILE_API_VERSION = "2"
+VAGRANTFILE_API_VERSION = '2'
+ENV['LC_ALL']           = 'en_US.UTF-8'
 
 Vagrant.require_version '>= 2.2.4'
 require 'yaml'
 require 'fileutils'
 
-require './.vvv/lib/info.rb'
-require './.vvv/lib/config.rb'
-require './.vvv/lib/splash_screens.rb'
-require './.vvv/lib/bootstrap.rb'
-require './.vvv/lib/migrate.rb'
+require './.vvv/lib/info'
+require './.vvv/lib/config'
+require './.vvv/lib/splash_screens'
+require './.vvv/lib/bootstrap'
+require './.vvv/lib/migrate'
 
 VVV::SplashScreens.v_logo_with_info if VVV::Bootstrap.show_logo?
-
 VVV.SplashScreens.warning_sudo_bear if VVV::Bootstrap.show_sudo_bear?
 
 VVV::Migrate.migrate_config
 VVV::Migrate.migrate_sql_database_backups
 
-###
-# Temporary tape and chewing gum to glue the new code to the old
-###
 vvv_config  = VVV::Config.new.values
 vagrant_dir = VVV::Info.vagrant_dir
 
 if VVV::Bootstrap.show_logo?
-  VVV::SplashScreens.info_platform
+  VVV::SplashScreens.info_platform vvv_config
   VVV::SplashScreens.info_provider(
     vvv_config['vm_config']['provider'],
     VVV::Info.provider_version(vvv_config['vm_config']['provider'])
   )
+  if VVV::Bootstrap.box_overridden?(vvv_config)
+    VVV::SplashScreens.info_box_overridden
+  end
 end
-
-if defined? vvv_config['vm_config']['provider']
-  # Override or set the vagrant provider.
-  ENV['VAGRANT_DEFAULT_PROVIDER'] = vvv_config['vm_config']['provider']
-end
-
-ENV['LC_ALL'] = 'en_US.UTF-8'
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # VirtualBox
